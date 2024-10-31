@@ -36,7 +36,7 @@
     sudo apt install ssh
     sudo apt install sshpass
 ```
-Клинировать репозиторий 
+Клонировать репозиторий 
 ```
     git clone -b ansible https://github.com/bobkovIBAS/DevOpsTask.git
     cd DevOpsTask
