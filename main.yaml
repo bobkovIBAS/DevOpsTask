@@ -1,0 +1,52 @@
+- name: Install and configure Postgresql 16
+  hosts: debian_server
+  become: true
+  vars_files:
+    - vars.yaml
+
+  tasks:
+    - name: Update cache
+      apt:
+        update_cache: yes
+
+    - name: Install system packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - gnupg
+        - lsb-release
+        - wget
+
+    - name: Add postgresql key
+      apt_key:
+        url: "{{ pg_key_url }}"
+        state: present
+
+    - name: Add Postgresql repository
+      apt_repository:
+        repo: "{{ pg_repo_url }}"
+        state: present
+
+    - name: Update apt cache after adding repository
+      apt:
+        update_cache: yes
+
+    - name: Install Postgresql
+      apt:
+        name: "postgresql-{{ pg_version }}"
+        state: present
+
+    - name: Configure Postgresql listen addresses
+      lineinfile:
+        path: "{{ pg_conf_path }}"
+        regexp: '^#?listen_addresses'
+        line: "listen_addresses = '{{ listen_address }}'"
+        state: present
+      notify: Restart PostgreSQL
+
+  handlers:
+    - name: Restart PostgreSQL
+      systemd:
+        name: postgresql
+        state: restarted

@@ -1,0 +1,6 @@
+pg_version: "16"
+pg_repo_url: "deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_lsb.codename }}-pgdg main"
+pg_key_url: "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
+pg_conf_path: "/etc/postgresql/{{ pg_version }}/main/postgresql.conf"
+max_connections: 150
+listen_address: '*'

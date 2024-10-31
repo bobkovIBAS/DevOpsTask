@@ -1,0 +1,3 @@
+- import_playbook: setup_sudo.yaml
+- import_playbook: setup_ssh_key.yaml
+- import_playbook: main.yaml

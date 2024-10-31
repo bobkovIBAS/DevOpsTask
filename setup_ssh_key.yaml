@@ -1,0 +1,44 @@
+- name: Generate ssh key and added to remote server
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Generate ssh key
+      openssl_privatekey:
+        path: "~/.ssh/id_rsa"
+        type: RSA
+        size: 4096
+      register: ssh_key
+      changed_when: ssh_key is defined
+
+    - name: Extract public key from generated private key
+      command: "ssh-keygen -y -f ~/.ssh/id_rsa"
+      register: public_key
+      when: ssh_key is defined
+      changed_when: false
+
+    - name: Store public key in a file
+      copy:
+        dest: "~/.ssh/id_rsa.pub"
+        content: "{{ public_key.stdout }}"
+      when: ssh_key is defined
+      changed_when: false
+
+- name: Add Ssh public key to remote server
+  hosts: debian_server
+  become: true
+  vars:
+    ansible_ssh_pass: "123123"
+  tasks:
+    - name: Ensure ~/.ssh directory exists on remote server
+      file:
+        path: /home/{{ ansible_user }}/.ssh
+        state: directory
+        mode: '0700'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Add generated ssh public key to authorized_keys
+      authorized_key:
+        user: "{{ ansible_user }}"
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
